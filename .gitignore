@@ -5,8 +5,8 @@
 __pycache__/
 
 # 忽略数据文件
-app/backend/sqlite/patents_add.db
-*.csv
+patents_add.db
+
 
 # 忽略本地配置
 .env
