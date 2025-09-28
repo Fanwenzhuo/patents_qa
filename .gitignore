@@ -1,0 +1,12 @@
+
+
+# 忽略 Python 编译文件
+*.pyc
+__pycache__/
+
+# 忽略数据文件
+app/backend/sqlite/patents_add.db
+*.csv
+
+# 忽略本地配置
+.env
