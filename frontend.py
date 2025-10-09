@@ -101,6 +101,9 @@ if "messages" not in st.session_state:
 if "is_loading" not in st.session_state:
     st.session_state.is_loading = False
 
+if "clear_input" not in st.session_state:
+    st.session_state.clear_input = False
+
 def add_message(role, content):
     """添加消息到聊天记录"""
     st.session_state.messages.append({"role": role, "content": content})
@@ -160,6 +163,10 @@ def main():
     col1, col2 = st.columns([6, 1])
     
     with col1:
+        # 在实例化输入框之前，根据标志清空输入
+        if st.session_state.get("clear_input"):
+            st.session_state.user_input = ""
+            st.session_state.clear_input = False
         user_input = st.text_input(
             "请输入您的问题：",
             placeholder="例如：查找日立化成工业股份有限公司的专利",
@@ -178,8 +185,8 @@ def main():
         add_message("user", user_input)
         st.session_state.is_loading = True
         
-        # 清空输入框
-        st.session_state.user_input = ""
+        # 下次渲染前清空输入框
+        st.session_state.clear_input = True
         
         # 重新运行以显示用户消息
         st.rerun()

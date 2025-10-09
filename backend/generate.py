@@ -1,6 +1,6 @@
-from components.llm import llm
-from components.prompts import chat_prompt_template
-from text_to_sql.text2sql_llm import text2sql, extract_sql, run_query
+from backend.components.llm import llm
+from backend.components.prompts import chat_prompt_template
+from backend.text_to_sql.text2sql_llm import text2sql, extract_sql, run_query
 
 
 def generate_answer(question: str, history=None) -> str:
