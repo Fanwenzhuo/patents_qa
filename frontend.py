@@ -1,5 +1,5 @@
 import streamlit as st
-from backend.generate import generate_answer
+from generate import generate_answer
 
 import sys
 from pathlib import Path

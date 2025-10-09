@@ -6,7 +6,7 @@ from opencc import OpenCC
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 from backend.components.llm import llm
-from backend.components.text2sql_prompts import prompt
+from backend.components.text2sql_prompts import text2sql_template
 
 # 获取数据库路径
 DB_PATH = os.path.join(current_dir, "..", "sqlite", "patents_add.db")
@@ -36,7 +36,7 @@ def extract_sql(text: str) -> str:
     if text.endswith(';'):
         text = text[:-1].strip()
 
-    # 如果首尾是双引号，去掉它们
+    # 去掉首尾双引号
     if text.startswith('"') and text.endswith('"'):
         text = text[1:-1]
 
@@ -82,7 +82,7 @@ def text2sql(question: str) -> str:
     print("转繁体后的问题:", question)
     try:
         # 构建提示词
-        formatted_prompt = prompt.format(question=question)
+        formatted_prompt = text2sql_template.format(question=question)
         
         # 调用大模型生成SQL
         response = llm.invoke(formatted_prompt)

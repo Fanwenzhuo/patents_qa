@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 chat_prompt_template = ChatPromptTemplate.from_messages([
-    ("system", """你是一个半导体领域的专利问答机器人。
+    ("system", """你是一个专利问答机器人。
       以下是根据问题从专利数据库中检索到的相关信息：
       {context}
 

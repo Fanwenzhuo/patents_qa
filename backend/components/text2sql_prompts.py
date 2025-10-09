@@ -1,7 +1,7 @@
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
-text2sql_template = """
-你是一个 SQL 生成器。请根据用户的提问和提供的数据库表结构，生成**唯一且正确**的 SQL 查询语句。
+text2sql_template = ChatPromptTemplate.from_messages([
+    ("system", """你是一个 SQL 生成器。请根据用户的提问和提供的数据库表结构，生成**唯一且正确**的 SQL 查询语句。
 
 数据库表结构如下：
 CREATE TABLE IF NOT EXISTS datalist (
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS datalist (
     "详细说明" TEXT,
     "优先权" TEXT,
     "公报IPC" TEXT,
-    "IPC" TEXT,
+    "IPC" TEXT
 );
 
 数据表内容示例：
@@ -43,9 +43,7 @@ CREATE TABLE IF NOT EXISTS datalist (
   "IPC": "C09G 1/02(2006.01)"
 
 
-
-
-## 严格规则（必须遵守）：
+严格规则（必须遵守）：
 1. 表名固定为：`datalist`
 2. 所有字段名必须用双引号括起来，如 `"申请人"`
 3. 只允许生成 SELECT 查询语句，禁止 INSERT、UPDATE、DELETE 等任何其他操作
@@ -56,20 +54,12 @@ CREATE TABLE IF NOT EXISTS datalist (
    - 错误示例：`"申请人" = '日立化成工業股份有限公司'`
 7. 时间匹配使用 `LIKE '2003%'` 或 `BETWEEN`，不要使用 `=` 精确匹配年份
 
-## 示例1：
+示例1：
 问题：日立化成工業股份有限公司2003年發表的專利是什麼？
 SQL：SELECT "专利名" FROM datalist WHERE "申请人" LIKE '%日立化成工業股份有限公司%' AND "公开日期" LIKE '2003%';
 
-## 示例2：
+示例2：
 问题：给出公开号为TW200300027A的专利的专利名
-SQL：SELECT "专利名" FROM datalist WHERE "公开号" = 'TW200300027A';
-
-用户问题：{question}
-
-请输出符合要求的 SQL 查询语句（仅 SQL，以分号结尾）：
-"""
-
-prompt = PromptTemplate(
-    template=text2sql_template,
-    input_variables=["question"]
-)
+SQL：SELECT "专利名" FROM datalist WHERE "公开号" = 'TW200300027A';"""),
+    ("human", "用户问题：{question}\n\n请输出符合要求的 SQL 查询语句（仅 SQL，以分号结尾）：")
+])
