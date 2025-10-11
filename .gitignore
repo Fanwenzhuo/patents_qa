@@ -10,3 +10,4 @@ patents_add.db
 
 # 忽略本地配置
 .env
+backend/sqlite/patents.db
