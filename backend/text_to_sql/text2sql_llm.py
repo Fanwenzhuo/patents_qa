@@ -1,7 +1,6 @@
 import os
 import sqlite3
 import re
-from opencc import OpenCC
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -9,77 +8,61 @@ from backend.components.llm import llm
 from backend.components.text2sql_prompts import text2sql_template
 
 # 获取数据库路径
-DB_PATH = os.path.join(current_dir, "..", "sqlite", "patents_add.db")
+DB_PATH = os.path.join(current_dir, "..", "sqlite", "patents.db")
 
-def to_traditional_chinese(text: str) -> str:
-    """
-    将输入的简体中文问题转换为繁体中文
-    """
-    # s2t: Simplified Chinese to Traditional Chinese
-    converter = OpenCC('s2tw')
-    result = converter.convert(text)
-    # 映射表：你可以自己扩展
-    replacements = {
-        "臺": "台",
-        "制": "製",
-    }
-    for old, new in replacements.items():
-        result = result.replace(old, new)
-    return result
+ 
+
+import re
 
 def extract_sql(text: str) -> str:
-  
-    # 去掉前后空格
     text = text.strip()
-
-    # 去掉末尾分号
     if text.endswith(';'):
         text = text[:-1].strip()
-
-    # 去掉首尾双引号
     if text.startswith('"') and text.endswith('"'):
         text = text[1:-1]
 
-    # 正则提取第一个 SELECT 开头的语句
     match = re.search(r"(SELECT.*?)(?:;|\Z)", text, re.IGNORECASE | re.DOTALL)
     if match:
         sql = match.group(1).strip()
     else:
         sql = text.strip()
 
-    # --- 强制转换：将指定字段的 "=" 替换为 "LIKE '%...%'" ---
-    # 定义需要模糊匹配的字段（根据你的表结构）
     fuzzy_fields = [
-        "公开日期", "申请号", "公开号", "专利名", 
-        "申请人", "发明人", "代理人", "摘要", "专利范围", "详细说明"
+        "公开日期", "申请号", "公开号", "专利名", "申请人", "关键词", "URL", "发明人",
+        "代理人", "摘要", "专利范围", "详细说明", "优先权", "公报IPC", "IPC"
     ]
 
+    # 第一步：标准化字段名为双引号形式
     for field in fuzzy_fields:
-        # 匹配模式： "字段" = '值'  或  "字段" = "值"
-        # 注意：字段名带双引号，值可能是单引号或双引号
+        escaped_field = re.escape(field)
+        pattern = rf'''[`"]?{escaped_field}[`"]?'''
+        pattern = rf'(?<!\w){pattern}(?!\w)'
+
+        # 替换为双引号形式
+        sql = re.sub(pattern, f'"{field}"', sql, flags=re.IGNORECASE)
+
+    # 第二步：对标准化后的 SQL 执行模糊替换
+    for field in fuzzy_fields:
+        # 现在字段一定是双引号，所以可以直接匹配
         pattern = rf'("{re.escape(field)}")\s*=\s*(\'[^\']*\'|"[^"]*")'
         
         def replace_match(m):
-            field_part = m.group(1)
-            value_part = m.group(2)
-            # 如果是单引号包围的值
+            field_part = m.group(1)      # 一定是 "字段"
+            value_part = m.group(2)      # '值' 或 "值"
+            raw_value = value_part[1:-1]
             if value_part.startswith("'"):
-                return f'{field_part} LIKE \'%{value_part[1:-1]}%\''
+                return f'{field_part} LIKE \'%{raw_value}%\''
             else:
-                return f'{field_part} LIKE "%{value_part[1:-1]}%"'
+                return f'{field_part} LIKE "%{raw_value}%"'
         
-        # 执行替换
         sql = re.sub(pattern, replace_match, sql, flags=re.IGNORECASE)
 
-    # --- 格式清理 ---
-    sql = sql.replace('\\"', '"')  # 处理转义双引号
-    sql = sql.strip()
-
+    sql = sql.replace('\\"', '"').strip()
     return sql
 
 def text2sql(question: str) -> str:
-    question = to_traditional_chinese(question)
-    print("转繁体后的问题:", question)
+    question = question.strip()
+    print("问题:", question)
     try:
         # 构建提示词
         formatted_prompt = text2sql_template.format(question=question)

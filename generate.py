@@ -30,13 +30,14 @@ def generate_answer(question: str, history=None) -> str:
     # Step 3: 构建带上下文的 prompt 并调用 LLM
     chain = chat_prompt_template | llm
 
-    # 注意：你的 chat_prompt_template 需要支持 {context} 和 {question}
+    # 注意：你的 chat_prompt_template 需要支持 {context}、{question} 和 {sql}
     response = chain.invoke({
-        "context": context,
-        "question": question
+        "question": question,
+        "sql": sql,
+        "context": context
     })
     
-    return response
+    return response.content
 
 if __name__ == "__main__":
     question = "给出台湾积体电路制造股份有限公司，半导体制造方法的相关专利摘要，不少于2篇。"

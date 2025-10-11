@@ -5,9 +5,9 @@
 __pycache__/
 
 # 忽略数据文件
-patents_add.db
+patents.db
 
 
 # 忽略本地配置
 .env
-backend/sqlite/patents.db
+
