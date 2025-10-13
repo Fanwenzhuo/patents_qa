@@ -1,6 +1,7 @@
 from backend.components.llm import llm
 from backend.components.prompts import chat_prompt_template
-from backend.text_to_sql.text2sql_llm import text2sql, extract_sql, run_query
+from backend.text_to_sql.text2sql_llm import text2sql, extract_sql
+from backend.query import run_query, format_results_exclude_url, reference_for_answer
 
 
 def generate_answer(question: str, history=None) -> str:
@@ -17,15 +18,9 @@ def generate_answer(question: str, history=None) -> str:
 
     results = run_query(sql_query)
     
-    if not results:
-        context = "数据库中未找到相关专利信息。"
-    else:
-        context = "查询结果：\n"
-    if isinstance(results, int):  # 处理 COUNT(*) 这种情况
-        context += f"{results}\n"
-    else:
-        for i, row in enumerate(results, 1):
-            context += f"{i}. {str(row)}\n"
+    # 构建自然语言上下文块（专利id、专利信息）
+    context = format_results_exclude_url(results)
+    print("context:", context)
 
 
     # Step 3: 构建带上下文的 prompt 并调用 LLM
@@ -38,7 +33,9 @@ def generate_answer(question: str, history=None) -> str:
         "context": context
     })
     
-    return response.content
+    # 构建参考文献
+    refs = reference_for_answer(results)
+    return f"{response.content}\n{refs}" if refs else response.content
 
 if __name__ == "__main__":
     question = "给出台湾积体电路制造股份有限公司，半导体制造方法的相关专利摘要，不少于2篇。"
