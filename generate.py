@@ -9,12 +9,13 @@ def generate_answer(question: str, history=None) -> str:
     if not sql_query:
         return "抱歉，我无法根据问题生成有效的SQL查询。"
 
-    # Step 2: 提取并执行 SQL
-    sql = extract_sql(sql_query)  # 从输出中提取纯 SQL
-    if not sql:
-        return "无法提取SQL语句。"
+    # # Step 2: 提取并执行 SQL
+    # sql = extract_sql(sql_query)  # 从输出中提取纯 SQL
+    # if not sql:
+    #     return "无法提取SQL语句。"
+    
 
-    results = run_query(sql)
+    results = run_query(sql_query)
     
     if not results:
         context = "数据库中未找到相关专利信息。"
@@ -33,7 +34,7 @@ def generate_answer(question: str, history=None) -> str:
     # 注意：你的 chat_prompt_template 需要支持 {context}、{question} 和 {sql}
     response = chain.invoke({
         "question": question,
-        "sql": sql,
+        "sql": sql_query,
         "context": context
     })
     
