@@ -1,6 +1,6 @@
 from backend.components.llm import llm
 from backend.components.prompts import chat_prompt_template
-from backend.text_to_sql.text2sql_llm import text2sql, extract_sql
+from backend.text_to_sql.text2sql_llm import text2sql
 from backend.query import run_query, format_results_exclude_url, reference_for_answer
 
 
