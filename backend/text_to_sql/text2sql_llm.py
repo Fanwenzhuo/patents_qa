@@ -129,23 +129,3 @@ def text2sql(question: str) -> str:
         
     except Exception as e:
         raise Exception(f"生成SQL查询失败: {str(e)}")
-
-# def run_query(sql_query: str):
-#     # 检查数据库文件是否存在
-#     if not os.path.exists(DB_PATH):
-#         raise FileNotFoundError(f"数据库文件不存在: {DB_PATH}")
-    
-#     conn = None
-#     try:
-#         conn = sqlite3.connect(DB_PATH)
-#         cur = conn.cursor()
-#         cur.execute(sql_query)
-#         result = cur.fetchall()
-#         print(f'查询结果：{result}')
-#         return result
-#     except sqlite3.Error as e:
-#         raise sqlite3.Error(f"SQL执行错误: {str(e)}")
-#     finally:
-#         if conn:
-#             conn.close()
-

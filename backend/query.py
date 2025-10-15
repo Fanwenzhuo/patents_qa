@@ -30,7 +30,7 @@ def format_results_exclude_url(results) -> str:
     """将数据库查询结果整理为适合模型理解的自然语言（不含URL）：专利id、专利信息。
 
     规则：
-    - 专利id与URL为每条记录的最后两个元素（URL被忽略，仅用于定位位置）。
+    - 专利id与URL为每条记录的最后两个元素（URL被忽略）。
     - 若长度为3：第一个元素是专利信息。
     - 若长度大于3：最后两个元素之前的所有元素合并为专利信息。
     - 若长度不足2，则尽量显示已有字段并以“未知/无”占位。
@@ -74,7 +74,7 @@ def reference_for_answer(results) -> str:
         return ""
 
     lines = []
-    # 固定添加引用来源首行（不改变现有结构与逻辑）
+    # 固定添加引用来源首行
     lines.append("引用来源：")
     for row in results:
         row_values = list(row) if isinstance(row, (list, tuple)) else [row]

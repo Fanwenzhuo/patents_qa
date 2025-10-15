@@ -5,12 +5,12 @@ from backend.query import run_query, format_results_exclude_url, reference_for_a
 
 
 def generate_answer(question: str, history=None) -> str:
-    # Step 1: 生成 SQL
+    # 生成 SQL
     sql_query = text2sql(question)
     if not sql_query:
         return "抱歉，我无法根据问题生成有效的SQL查询。"
 
-    # # Step 2: 提取并执行 SQL
+    # 提取并执行 SQL
     # sql = extract_sql(sql_query)  # 从输出中提取纯 SQL
     # if not sql:
     #     return "无法提取SQL语句。"
@@ -23,10 +23,9 @@ def generate_answer(question: str, history=None) -> str:
     print("context:", context)
 
 
-    # Step 3: 构建带上下文的 prompt 并调用 LLM
+    # 构建带上下文的 prompt 并调用 LLM
     chain = chat_prompt_template | llm
 
-    # 注意：你的 chat_prompt_template 需要支持 {context}、{question} 和 {sql}
     response = chain.invoke({
         "question": question,
         "sql": sql_query,
