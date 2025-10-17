@@ -1,4 +1,4 @@
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate
 
 chat_prompt_template = ChatPromptTemplate.from_messages([
     ("system", """你是一个专利问答助手。严格依据给定上下文作答，输出自然、易读、有人情味的中文答案。

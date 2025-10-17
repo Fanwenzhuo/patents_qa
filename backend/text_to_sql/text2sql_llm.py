@@ -28,8 +28,8 @@ def extract_sql(text: str) -> str:
         sql = text.strip()
 
     fuzzy_fields = [
-        "公开日期", "申请号", "公开号", "专利名", "申请人", "关键词", "URL", "发明人",
-        "代理人", "摘要", "专利范围", "详细说明", "优先权", "公报IPC", "IPC"
+        "公开日期", "申请号", "公开号", "专利名", "申请人", "关键词", "url", "发明人",
+        "代理人", "摘要", "专利范围", "详细说明", "优先权", "公报ipc", "ipc"
     ]
 
     # 第一步：标准化字段名为双引号形式
@@ -61,10 +61,10 @@ def extract_sql(text: str) -> str:
     return sql
 
 def ensure_select_id_url(sql: str) -> str:
-    """确保 SELECT 语句的投影列表中包含 "id" 与 "URL" 两个字段。
+    """确保 SELECT 语句的投影列表中包含 "id"、"URL" 与 "专利名" 三个字段。
 
     - 若 SELECT 列表中包含 * 或 任意 table.*，则认为已包含所有列，不做修改。
-    - 若已显式包含 id 或 URL（大小写不敏感，支持是否加引号、是否带表前缀/别名），则不重复添加。
+    - 若已显式包含 id、URL 或 专利名（大小写不敏感，支持是否加引号、是否带表前缀/别名），则不重复添加。
     - 仅处理最外层简单 SELECT ... FROM ... 的场景，无法保证嵌套/复杂子查询的完备性。
     """
     try:
@@ -80,15 +80,19 @@ def ensure_select_id_url(sql: str) -> str:
         if has_star:
             return sql
 
-        # 判断是否已包含 id / URL（忽略大小写，允许可选表前缀与引号）
+        # 判断是否已包含 id / URL / 专利名（忽略大小写，允许可选表前缀与引号）
         id_present = bool(re.search(r"(?i)(?:\b\w+\s*\.\s*)?\"?id\"?(?!\w)", select_list))
         url_present = bool(re.search(r"(?i)(?:\b\w+\s*\.\s*)?\"?url\"?(?!\w)", select_list))
+        # 专利名字段在上游标准化后通常为双引号包裹的中文名，这里既匹配标准化形式，也尽量兼容未标准化情形
+        patent_name_present = bool(re.search(r"(?:\b\w+\s*\.\s*)?\"?专利名\"?(?!\w)", select_list, flags=re.IGNORECASE))
 
         to_add = []
         if not id_present:
             to_add.append('"id"')
         if not url_present:
-            to_add.append('"URL"')
+            to_add.append('"url"')
+        if not patent_name_present:
+            to_add.append('"专利名"')
 
         if not to_add:
             return sql
@@ -117,9 +121,9 @@ def text2sql(question: str) -> str:
         sql_query = extract_sql(response.content)
         print("提取的SQL:", sql_query)
 
-        # 强制包含 id 与 URL 字段
+        # 强制包含 id、URL 与 专利名 字段
         sql_query = ensure_select_id_url(sql_query)
-        print("追加id/URL后的SQL:", sql_query)
+        print("追加id/URL/专利名后的SQL:", sql_query)
 
         # 验证 SQL 是否以 SELECT 开头
         if not sql_query.upper().startswith('SELECT'):
