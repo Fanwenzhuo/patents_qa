@@ -8,6 +8,11 @@ from backend.query import run_query, format_results_exclude_url, reference_for_a
 def generate_answer(question: str, history=None) -> dict:
     # 生成 SQL
     sql_query = text2sql(question)
+    
+    # 检查是否是查全表的语句，如果是则置空
+    if sql_query and sql_query.strip().upper().startswith('SELECT *'):
+        sql_query = ""
+    
     if not sql_query:
         return {
             "content": "抱歉，我无法根据问题生成有效的SQL查询。",
@@ -53,6 +58,6 @@ def generate_answer(question: str, history=None) -> dict:
 
 
 if __name__ == "__main__":
-    question = "给出台湾积体电路制造股份有限公司，半导体制造方法的相关专利摘要，不少于2篇。"
+    question = "本关系型数据库专门收录专利文献的结构化元数据,涵盖申请/公开日期与号码、专利名称、申请人、发明人、代理人、摘要、权利要求、详细说明、优先权信息及国际专利分类(IPC)等字段,适用于对特定申请人(公司)、发明人、技术领域、时间范围或优先权地域等维度进行箱准专利检索与分析。"
     answer = generate_answer(question)
     print(answer)
