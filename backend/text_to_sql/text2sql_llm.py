@@ -63,7 +63,7 @@ def extract_sql(text: str) -> str:
 def ensure_select_id_url(sql: str) -> str:
     """确保 SELECT 语句的投影列表中包含 "id"、"url" 与 "patent_title" 三个字段。
 
-    - 若 SELECT 列表中包含 * 或 任意 table.*，则认为已包含所有列，不做修改。
+    - 若 SELECT 列表中包含 * 或 任意 table.*或COUNT(*)等聚合函数，则认为已包含所有列，不做修改。
     - 若已显式包含 id、url 或 patent_title（大小写不敏感，支持是否加引号、是否带表前缀/别名），则不重复添加。
     - 仅处理最外层简单 SELECT ... FROM ... 的场景，无法保证嵌套/复杂子查询的完备性。
     """
@@ -78,6 +78,9 @@ def ensure_select_id_url(sql: str) -> str:
         # 如果包含 * 或 table.*，视为已包含所有列
         has_star = bool(re.search(r"(^|[,\s])\*([,\s]|$)", select_list)) or bool(re.search(r"\.[\s]*\*", select_list))
         if has_star:
+            return sql
+        # 如果包含COUNT(*)等聚合函数，视为已包含所有列
+        if "," not in select_list and "(" in select_list and ")" in select_list:
             return sql
 
         # 判断是否已包含 id / URL / 专利名（忽略大小写，允许可选表前缀与引号）

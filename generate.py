@@ -58,6 +58,6 @@ def generate_answer(question: str, history=None) -> dict:
 
 
 if __name__ == "__main__":
-    question = "本关系型数据库专门收录专利文献的结构化元数据,涵盖申请/公开日期与号码、专利名称、申请人、发明人、代理人、摘要、权利要求、详细说明、优先权信息及国际专利分类(IPC)等字段,适用于对特定申请人(公司)、发明人、技术领域、时间范围或优先权地域等维度进行箱准专利检索与分析。"
+    question = "给出截止2025年6月31日IPC包含H01L21/02的台湾“本国公开”专利数量？"
     answer = generate_answer(question)
     print(answer)
