@@ -31,7 +31,7 @@ text2sql_template = ChatPromptTemplate.from_messages([
       - publication_number：专利公开编号
       - patent_title：描述专利主题、研究方向或创新点
       - applicant：申请该专利的公司、机构
-      - keywords：描述专利公开的国家地区范围
+      - keywords：描述专利公开的国家地区范围，要是查询台湾专利，则填写“本国公开”
       - url：专利网址
       - inventor：参与发明的人员
       - agent：负责申请事务的专利代理人
@@ -50,15 +50,15 @@ text2sql_template = ChatPromptTemplate.from_messages([
       - "patent_title": "研磨剂制造法",
       - "applicant": "日立化成公司",
       - "keywords": "本国公开",
-      - "url": "https://tiponet.tipo.gov.tw/gpss3/gpsskmc/gpssbkm?.976c5ED60850200470008720000000000^20100000100D0BC487000177F004d9e"
-      - "inventor": "吉田成人",
+      - "url": "https://tiponet.tipo.gov.tw/gpss3/gpsskmc/gpssbkm?.976c5ED60850200470008720000000000^20100000100D0BC487000177F004d9e",
+      - "inventor": "吉田成人（日本）；张世明（中华民国）",
       - "agent": "李志刚",
       - "abstract": "本发明乃为了......",
       - "patent_scope": ["一种研磨剂", "......"],
       - "detailed_description": "【发明内容】......",
       - "priority": "日本",
       - "gazette_ipc": "C09G",
-      - "ipc": "C09G 1/02(2006.01)"
+      - "ipc": "C09G1/02(2006.01)"
 
       严格规则（必须遵守）：
       1. 表名固定为：`patent`
@@ -70,6 +70,11 @@ text2sql_template = ChatPromptTemplate.from_messages([
         - 正确示例：`"applicant" LIKE '%日立化成工業股份有限公司%'`
         - 错误示例：`"applicant" = '日立化成工業股份有限公司'`
       7. 时间匹配使用 `LIKE '2003%'` 或 `BETWEEN`，不要使用 `=` 精确匹配年份
+      8. 涉及到具体领域的专利查询，尽可能使用简短的字段，以下是可能会出现的字段的映射：
+        - “集成电路制造工艺” -> “集成电路”
+        - “芯片功耗降低” -> “功耗”
+        - “生技医药” -> “生物”
+        - “芯片制造” -> “制造”
 
       示例1:
       问题: 日立化成工業股份有限公司2003年發表的專利是什麼？
@@ -138,6 +143,10 @@ text2sql_template = ChatPromptTemplate.from_messages([
       示例17：
       问题：列举出2025年，台湾积体电路制造股份有限公司，沈文超作为唯一发明人于电子领域的专利名称与专利的公开公告日。
       SQL：SELECT "patent_title", "publication_date" FROM patent WHERE "applicant" LIKE '%台湾积体电路制造股份有限公司%' AND "inventor" LIKE '%沈文超%' AND "patent_scope" LIKE '%电子%' ；
+
+      示例18：
+      问题：截止2025年6月31日IPC包含H01L21/02的台湾半导体专利公开公告号，不少于5篇。
+      SQL：SELECT "publication_number" FROM patent WHERE "ipc" LIKE '%H01L21/02%' AND "patent_title" LIKE '%半导体%' AND "keywords" LIKE '%本国公开%' AND "publication_date" <= '2025-06-30' LIMIT 5
 
       
       """),

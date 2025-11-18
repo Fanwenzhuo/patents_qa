@@ -2,7 +2,7 @@ import os
 import sqlite3
 
 sql_query = """
-SELECT COUNT(*) FROM patent WHERE "publication_date" LIKE '2020%' AND "ipc" LIKE '%H01L21/02%' AND "keywords" LIKE '%本国公开%'
+SELECT * FROM patent WHERE "applicant" LIKE '%祥硕%' 
 """
 
 
