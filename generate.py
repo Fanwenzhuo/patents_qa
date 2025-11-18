@@ -46,7 +46,7 @@ def generate_answer(question: str, history=None) -> dict:
 
     # 返回 JSON 格式的结果
     result_json =  {
-        "content": response.content if hasattr(response, "content") else str(response),
+        "content": "patent:" + (response.content if hasattr(response, "content") else str(response)),
         "text": context,
         "source_title": source_title,
         "source_url": source_url,
